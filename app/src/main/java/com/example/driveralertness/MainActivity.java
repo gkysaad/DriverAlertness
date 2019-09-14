@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.media.Image;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.view.TextureView;
@@ -135,6 +136,24 @@ public class MainActivity extends AppCompatActivity {
                 FirebaseVisionFaceDetector detector = FirebaseVision.getInstance()
                         .getVisionFaceDetector(options);
                 FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(pic);
+                Task<List<FirebaseVisionFace>> result = detector
+                        .detectInImage(image)
+                        .addOnSuccessListener(new
+                                                      OnSuccessListener<List<FirebaseVisionFace>>() {
+                                                          @Override
+                                                          public void onSuccess(List<FirebaseVisionFace> faces) {
+                                                              for (FirebaseVisionFace face : faces) {
+                                                                  Log.d("tag", "****************************");
+                                                                  Log.d("tag", "face ["+face+"]");
+                                                                  Log.d("tag", "Smiling Prob ["+face.getSmilingProbability()+"]");
+                                                                  Log.d("tag", "Left eye open ["+face.getLeftEyeOpenProbability()+"]");
+                                                                  Log.d("tag", "Right eye open ["+face.getRightEyeOpenProbability()+"]");
+
+
+                                                              }
+                                                          }
+                                                      });
+               /*
                 Task<List<FirebaseVisionFace>> result =
                         detector.detectInImage(image)
                                 .addOnSuccessListener(
@@ -183,6 +202,8 @@ public class MainActivity extends AppCompatActivity {
                                                 // ...
                                             }
                                         });
+
+                */
 
             }
         });
