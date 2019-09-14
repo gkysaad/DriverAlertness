@@ -48,15 +48,17 @@ public class MainActivity extends AppCompatActivity {
         Button startButton = findViewById(R.id.startbutton);
         Button infoButton = findViewById(R.id.information);
 
+
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 setContentView(R.layout.activity_main);
+                textureView = findViewById(R.id.view_finder);
+                startCamera();
             }
         });
-        textureView = findViewById(R.id.view_finder);
 
-        startCamera();
+
     }
 
     private void startCamera() {
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         Size screen = new Size(textureView.getWidth(), textureView.getHeight()); //size of the screen
 
 
-        PreviewConfig pConfig = new PreviewConfig.Builder().setTargetAspectRatio(aspectRatio).setTargetResolution(screen).build();
+        PreviewConfig pConfig = new PreviewConfig.Builder().setLensFacing(CameraX.LensFacing.FRONT).setTargetAspectRatio(aspectRatio).setTargetResolution(screen).build();
         Preview preview = new Preview(pConfig);
 
         preview.setOnPreviewOutputUpdateListener(
@@ -85,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 });
 
 
-        ImageCaptureConfig imageCaptureConfig = new ImageCaptureConfig.Builder().setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY)
+        ImageCaptureConfig imageCaptureConfig = new ImageCaptureConfig.Builder().setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY).setLensFacing(CameraX.LensFacing.FRONT)
                 .setTargetRotation(getWindowManager().getDefaultDisplay().getRotation()).build();
         final ImageCapture imgCap = new ImageCapture(imageCaptureConfig);
 
