@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "121269048187",
+    "firebase_url": "https://driver-alertness-htn.firebaseio.com",
+    "project_id": "driver-alertness-htn",
+    "storage_bucket": "driver-alertness-htn.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121269048187:android:8d5b06cd6b6eb93028e3de",
+        "android_client_info": {
+          "package_name": "com.example.driveralertness"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "121269048187-4g14naujkhc0u45sma4mf6r2muvvd5fk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmqQdwk7NCrI9WNLknbFZ_reKkb8dkZ6I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "121269048187-4g14naujkhc0u45sma4mf6r2muvvd5fk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
