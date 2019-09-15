@@ -8,9 +8,11 @@ import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.media.AudioAttributes;
 import android.media.Image;
+import android.media.ImageReader;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraX;
 import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.ImageAnalysisConfig;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureConfig;
 import androidx.camera.core.ImageProxy;
@@ -62,19 +65,27 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceLandmark;
 import com.google.firebase.ml.vision.objects.FirebaseVisionObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TimerTask;
+import java.util.Timer;
+
 
 import static android.provider.ContactsContract.Directory.PACKAGE_NAME;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    Preview preview;
     private int REQUEST_CODE_PERMISSIONS = 101;
     private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
     TextureView textureView;
+    boolean[] closed = new boolean[3];
+    int counter = 0;
 
-    @Override
+        @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mainscreen);
@@ -93,10 +104,27 @@ public class MainActivity extends AppCompatActivity {
                 setContentView(R.layout.activity_main);
                 textureView = findViewById(R.id.view_finder);
                 startCamera();
+                start();
             }
         });
 
 
+    }
+
+    private Timer timer;
+    private TimerTask timerTask = new TimerTask() {
+
+        @Override
+        public void run() {
+            startScan();
+        }
+    };
+    public void start() {
+        /*if(timer != null) {
+            return;
+        }*/
+        timer = new Timer();
+        timer.scheduleAtFixedRate(timerTask, 100, 300);
     }
 
     private void createNotificationChannel() {
@@ -104,15 +132,14 @@ public class MainActivity extends AppCompatActivity {
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "notification";
-            String description = "stay awake fool";
+            String description = "stay awake";
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel("poggers", name, importance);
             channel.setDescription(description);
             AudioAttributes attributes = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                     .build();
-            Uri sound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.example.driveralertness/" + R.raw.alert);
-            channel.setSound(sound, attributes);
+
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
@@ -120,22 +147,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void startCamera() {
+    public Preview startCamera() {
+
 
         CameraX.unbindAll();
 
-        Rational aspectRatio = new Rational (textureView.getWidth(), textureView.getHeight());
+
+        Rational aspectRatio = new Rational(textureView.getWidth(), textureView.getHeight());
         Size screen = new Size(textureView.getWidth(), textureView.getHeight()); //size of the screen
 
 
         PreviewConfig pConfig = new PreviewConfig.Builder().setLensFacing(CameraX.LensFacing.FRONT).setTargetAspectRatio(aspectRatio).setTargetResolution(screen).build();
-        Preview preview = new Preview(pConfig);
+        preview = new Preview(pConfig);
+
+
+        ImageCaptureConfig imageCaptureConfig = new ImageCaptureConfig.Builder().setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY).setLensFacing(CameraX.LensFacing.FRONT)
+                .setTargetRotation(getWindowManager().getDefaultDisplay().getRotation()).build();
+        final ImageCapture imgCap = new ImageCapture(imageCaptureConfig);
+
+        CameraX.bindToLifecycle((LifecycleOwner) this, preview, imgCap);
 
         preview.setOnPreviewOutputUpdateListener(
                 new Preview.OnPreviewOutputUpdateListener() {
                     //to update the surface texture we  have to destroy it first then re-add it
                     @Override
-                    public void onUpdated(Preview.PreviewOutput output){
+                    public void onUpdated(Preview.PreviewOutput output) {
                         ViewGroup parent = (ViewGroup) textureView.getParent();
                         parent.removeView(textureView);
                         parent.addView(textureView, 0);
@@ -147,12 +183,24 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+        return preview;
+    }
 
-        ImageCaptureConfig imageCaptureConfig = new ImageCaptureConfig.Builder().setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY).setLensFacing(CameraX.LensFacing.FRONT)
-                .setTargetRotation(getWindowManager().getDefaultDisplay().getRotation()).build();
-        final ImageCapture imgCap = new ImageCapture(imageCaptureConfig);
+    public boolean checkAll() {
+        int count = 0;
+        for(int i = 0; i < 3; i++) {
+            if (closed[i]) {
+                count++;
+            }
+        }
+        if (count == 3) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-
+    public void startScan(){
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "poggers")
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle("ALERT: PLEASE FOCUS ON THE ROAD")
@@ -163,106 +211,66 @@ public class MainActivity extends AppCompatActivity {
         Notification notification = builder.build();
 
 
-
-        findViewById(R.id.imgCapture).setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
-                FirebaseVisionFaceDetectorOptions options =
-                        new FirebaseVisionFaceDetectorOptions.Builder()
-                                .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
-                                .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
-                                .enableTracking()
-                                .build();
-
-                Bitmap pic = textureView.getBitmap();
+        final FirebaseVisionFaceDetectorOptions options =
+                new FirebaseVisionFaceDetectorOptions.Builder()
+                        .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
+                        .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
+                        .enableTracking()
+                        .build();
 
 
 
-                FirebaseVisionFaceDetector detector = FirebaseVision.getInstance()
-                        .getVisionFaceDetector(options);
-                FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(pic);
-                Task<List<FirebaseVisionFace>> result = detector
-                        .detectInImage(image)
-                        .addOnSuccessListener(new
-                                                      OnSuccessListener<List<FirebaseVisionFace>>() {
-                                                          @Override
-                                                          public void onSuccess(List<FirebaseVisionFace> faces) {
+        Bitmap pic = textureView.getBitmap();
+        /*ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        pic.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+        pic.recycle();*/
+
+        FirebaseVisionFaceDetector detector = FirebaseVision.getInstance()
+                .getVisionFaceDetector(options);
+        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(pic);
+        Task<List<FirebaseVisionFace>> result = detector
+                .detectInImage(image)
+                .addOnSuccessListener(new
+                                              OnSuccessListener<List<FirebaseVisionFace>>() {
+                                                  @Override
+                                                  public void onSuccess(List<FirebaseVisionFace> faces) {
 
 
-                                                              for (FirebaseVisionFace face : faces) {
-                                                                  Log.d("tag", "****************************");
-                                                                  Log.d("tag", "face ["+face+"]");
-                                                                  Log.d("tag", "Smiling Prob ["+face.getSmilingProbability()+"]");
-                                                                  Log.d("tag", "Left eye open ["+face.getLeftEyeOpenProbability()+"]");
-                                                                  Log.d("tag", "Right eye open ["+face.getRightEyeOpenProbability()+"]");
-                                                                  if ((face.getLeftEyeOpenProbability() < 0.4) && (face.getRightEyeOpenProbability() < 0.4)) {
-                                                                      notificationManager.notify(69, builder.build());
-
-                                                                  }
-
-
+                                                      for (FirebaseVisionFace face : faces) {
+                                                              /*Log.d("tag", "****************************");
+                                                              Log.d("tag", "face [" + face + "]");
+                                                              Log.d("tag", "Smiling Prob [" + face.getSmilingProbability() + "]");
+                                                              Log.d("tag", "Left eye open [" + face.getLeftEyeOpenProbability() + "]");
+                                                              Log.d("tag", "Right eye open [" + face.getRightEyeOpenProbability() + "]");*/
+                                                          boolean sleeping = false;
+                                                          if ((face.getLeftEyeOpenProbability() < 0.4) && (face.getRightEyeOpenProbability() < 0.4)) {
+                                                              if (counter == 3) {
+                                                                  counter = 0;
                                                               }
+                                                              closed[counter] = true;
+                                                              counter++;
+                                                              sleeping = checkAll();
+
+                                                          } else {
+                                                              if (counter == 3) {
+                                                                  counter = 0;
+                                                              }
+                                                              closed[counter] = false;
+                                                              counter++;
                                                           }
-                                                      });
-               /*
-                Task<List<FirebaseVisionFace>> result =
-                        detector.detectInImage(image)
-                                .addOnSuccessListener(
-                                        new OnSuccessListener<List<FirebaseVisionFace>>() {
-                                            @Override
-                                            public void onSuccess(List<FirebaseVisionFace> faces) {
-                                                // Task completed successfully
-                                                for (FirebaseVisionFace face : faces) {
-                                                    Rect bounds = face.getBoundingBox();
-                                                    float rotY = face.getHeadEulerAngleY();  // Head is rotated to the right rotY degrees
-                                                    float rotZ = face.getHeadEulerAngleZ();  // Head is tilted sideways rotZ degrees
 
-                                                    // If landmark detection was enabled (mouth, ears, eyes, cheeks, and
-                                                    // nose available):
-                                                    FirebaseVisionFaceLandmark leftEar = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EAR);
-                                                    if (leftEar != null) {
-                                                        FirebaseVisionPoint leftEarPos = leftEar.getPosition();
-                                                    }
+                                                          if (sleeping){
+                                                              Log.d("tag","SLEEPING!!!");
+                                                              notificationManager.notify(69, builder.build());
+                                                          }
 
-                                                    // If contour detection was enabled:
-                                                    List<FirebaseVisionPoint> leftEyeContour =
-                                                            face.getContour(FirebaseVisionFaceContour.LEFT_EYE).getPoints();
-                                                    List<FirebaseVisionPoint> upperLipBottomContour =
-                                                            face.getContour(FirebaseVisionFaceContour.UPPER_LIP_BOTTOM).getPoints();
+                                                      }
+                                                  }
+                                              });
 
-                                                    // If classification was enabled:
-                                                    if (face.getSmilingProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
-                                                        float smileProb = face.getSmilingProbability();
-                                                    }
-                                                    if (face.getRightEyeOpenProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
-                                                        float rightEyeOpenProb = face.getRightEyeOpenProbability();
-                                                    }
 
-                                                    // If face tracking was enabled:
-                                                    if (face.getTrackingId() != FirebaseVisionFace.INVALID_ID) {
-                                                        int id = face.getTrackingId();
-                                                    }
-                                                }
-                                            }
-                                        })
-                                .addOnFailureListener(
-                                        new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                // Task failed with an exception
-                                                // ...
-                                            }
-                                        });
 
-                */
-
-            }
-        });
-
-        //bind to lifecycle:
-        CameraX.bindToLifecycle((LifecycleOwner)this, preview, imgCap);
 
 
 
