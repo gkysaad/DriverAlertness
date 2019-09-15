@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        build {
+            storeFile file('C:\\Program Files\\Java\\jre1.8.0_45\\bin\\my-release-key.keystore')
+            storePassword 'HacktheNorth'
+            keyAlias = 'alias_name'
+            keyPassword 'HacktheNorth'
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
     defaultConfig {
