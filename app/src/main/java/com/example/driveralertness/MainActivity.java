@@ -92,6 +92,12 @@ public class MainActivity extends AppCompatActivity {
 
         Button startButton = findViewById(R.id.startbutton);
         Button infoButton = findViewById(R.id.information);
+        infoButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+                    public void onClick(View v) {
+                setContentView(R.layout.infopage);
+            }
+        });
 
         FirebaseApp.initializeApp(this);
         String PACKAGE_NAME = getApplicationContext().getPackageName();
@@ -139,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
             AudioAttributes attributes = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                     .build();
-
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
