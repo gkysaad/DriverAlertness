@@ -111,8 +111,6 @@ public class MainActivity extends AppCompatActivity {
             AudioAttributes attributes = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                     .build();
-            Uri sound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.example.driveralertness/" + R.raw.alert);
-            channel.setSound(sound, attributes);
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
