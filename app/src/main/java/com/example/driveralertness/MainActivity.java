@@ -2,9 +2,17 @@ package com.example.driveralertness;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.media.AudioAttributes;
 import android.media.Image;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -21,6 +29,8 @@ import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.core.PreviewConfig;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
@@ -55,13 +65,14 @@ import com.google.firebase.ml.vision.objects.FirebaseVisionObject;
 import java.io.File;
 import java.util.List;
 
+import static android.provider.ContactsContract.Directory.PACKAGE_NAME;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private int REQUEST_CODE_PERMISSIONS = 101;
     private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
     TextureView textureView;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,13 +83,13 @@ public class MainActivity extends AppCompatActivity {
         Button infoButton = findViewById(R.id.information);
 
         FirebaseApp.initializeApp(this);
-
-
+        String PACKAGE_NAME = getApplicationContext().getPackageName();
 
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                createNotificationChannel();
                 setContentView(R.layout.activity_main);
                 textureView = findViewById(R.id.view_finder);
                 startCamera();
@@ -86,6 +97,27 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "notification";
+            String description = "stay awake fool";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel("poggers", name, importance);
+            channel.setDescription(description);
+            AudioAttributes attributes = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .build();
+            Uri sound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://com.example.driveralertness/" + R.raw.alert);
+            channel.setSound(sound, attributes);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     private void startCamera() {
@@ -120,7 +152,20 @@ public class MainActivity extends AppCompatActivity {
                 .setTargetRotation(getWindowManager().getDefaultDisplay().getRotation()).build();
         final ImageCapture imgCap = new ImageCapture(imageCaptureConfig);
 
+
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "poggers")
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle("ALERT: PLEASE FOCUS ON THE ROAD")
+                .setContentText("Take a break every so often if you are tired!!!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        Notification notification = builder.build();
+
+
+
         findViewById(R.id.imgCapture).setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
 
@@ -133,6 +178,8 @@ public class MainActivity extends AppCompatActivity {
 
                 Bitmap pic = textureView.getBitmap();
 
+
+
                 FirebaseVisionFaceDetector detector = FirebaseVision.getInstance()
                         .getVisionFaceDetector(options);
                 FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(pic);
@@ -142,12 +189,18 @@ public class MainActivity extends AppCompatActivity {
                                                       OnSuccessListener<List<FirebaseVisionFace>>() {
                                                           @Override
                                                           public void onSuccess(List<FirebaseVisionFace> faces) {
+
+
                                                               for (FirebaseVisionFace face : faces) {
                                                                   Log.d("tag", "****************************");
                                                                   Log.d("tag", "face ["+face+"]");
                                                                   Log.d("tag", "Smiling Prob ["+face.getSmilingProbability()+"]");
                                                                   Log.d("tag", "Left eye open ["+face.getLeftEyeOpenProbability()+"]");
                                                                   Log.d("tag", "Right eye open ["+face.getRightEyeOpenProbability()+"]");
+                                                                  if ((face.getLeftEyeOpenProbability() < 0.4) && (face.getRightEyeOpenProbability() < 0.4)) {
+                                                                      notificationManager.notify(69, builder.build());
+
+                                                                  }
 
 
                                                               }
