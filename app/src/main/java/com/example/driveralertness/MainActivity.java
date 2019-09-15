@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "notification";
-            String description = "stay awake fool";
+            String description = "stay awake";
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel("poggers", name, importance);
             channel.setDescription(description);
