@@ -10,7 +10,7 @@ HootGuard is meant to watch drivers using the front facing camera (as many drive
 
 <b>How we built it</b>
 
-Our app uses the CameraX library to take the image from the front facing camera. Then, we used the ML Kit in the Google Firebase API to look at the face of the driver and detect if they are dozing off. The app then plays a notification to wake up the driver and suggests that they take a break to rest.
+Our app uses the <b>CameraX</b> library to take the image from the front facing camera. Then, we used the <b>ML Kit</b> in the <b>Google Firebase API</b> to look at the face of the driver and detect if they are dozing off. The app then plays a notification to wake up the driver and suggests that they take a break to rest.
 
 <b>Challenges we ran into</b>
 
