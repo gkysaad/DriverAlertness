@@ -1,5 +1,11 @@
 # HootGuard
 
+<b> Screenshots</b>
+
+![Notification](https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/000/841/295/datas/gallery.jpg)
+![Start Screen](https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/000/841/296/datas/gallery.jpg)
+![Info Page](https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/000/841/298/datas/gallery.jpg)
+
 <b>Inspiration</b>
 
 We wanted to tackle a real problem that affects many people everyday. We wanted to create something to help keep everyone safe and save lives. We also had an interest in ML and APIs and wanted to built something with those. We found that many people are affected everyday by fatigued driving. In fact, it is estimated that 26% of accidents involve fatigued driving. So, we decided to try to help reduce this number by building our app, HootGuard.
@@ -27,3 +33,4 @@ We learned a lot from this hackathon. All of us had never built an Android app b
 <b>What's next for HootGuard</b>
 
 In a 36 hour hackathon, its difficult to have a fully ready for release app, so our goal for the app is to improve it by making it more efficient and responsive, as well as create an even better UI and implement more driving safety features, such as distraction detection.
+
