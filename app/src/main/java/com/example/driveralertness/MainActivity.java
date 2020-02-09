@@ -7,7 +7,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
@@ -50,9 +49,7 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -82,14 +79,12 @@ import static android.provider.ContactsContract.Directory.PACKAGE_NAME;
 
 public class MainActivity extends AppCompatActivity {
 
-
     Preview preview;
     private int REQUEST_CODE_PERMISSIONS = 101;
     private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
     TextureView textureView;
     boolean[] closed = new boolean[3];
     int counter = 0;
-    int alertnum = 0;
 
         @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,24 +93,10 @@ public class MainActivity extends AppCompatActivity {
 
         Button startButton = findViewById(R.id.startbutton);
         Button infoButton = findViewById(R.id.information);
-
-
-
-
-
         infoButton.setOnClickListener(new View.OnClickListener(){
             @Override
                     public void onClick(View v) {
                 setContentView(R.layout.infopage);
-                TextView textView = findViewById(R.id.textView2);
-                textView.setText(Integer.toString(alertnum));
-                Button backInfo = findViewById(R.id.infoback);
-                backInfo.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View v) {
-                        setContentView(R.layout.mainscreen);
-                    }
-                });
             }
         });
 
@@ -131,26 +112,17 @@ public class MainActivity extends AppCompatActivity {
                 textureView = findViewById(R.id.view_finder);
                 startCamera();
                 start();
-                Button mainBack = findViewById(R.id.mainback);
-                mainBack.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View v) {
-                        setContentView(R.layout.mainscreen);
-                    }
-                });
             }
         });
 
 
     }
 
-
     private Timer timer;
     private TimerTask timerTask = new TimerTask() {
 
         @Override
         public void run() {
-
             startScan();
         }
     };
@@ -297,7 +269,6 @@ public class MainActivity extends AppCompatActivity {
 
                                                           if (sleeping){
                                                               Log.d("tag","SLEEPING!!!");
-                                                              alertnum++;
                                                               notificationManager.notify(69, builder.build());
                                                           }
 
