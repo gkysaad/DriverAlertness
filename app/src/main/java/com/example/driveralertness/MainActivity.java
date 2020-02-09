@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioAttributes;
 import android.media.Image;
 import android.media.ImageReader;
@@ -208,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
                         ViewGroup parent = (ViewGroup) textureView.getParent();
                         parent.removeView(textureView);
                         parent.addView(textureView, 0);
-
                         textureView.setSurfaceTexture(output.getSurfaceTexture());
                         updateTransform();
 
@@ -262,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseVisionFaceDetector detector = FirebaseVision.getInstance()
                 .getVisionFaceDetector(options);
         FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(pic);
+
         Task<List<FirebaseVisionFace>> result = detector
                 .detectInImage(image)
                 .addOnSuccessListener(new
@@ -270,12 +271,13 @@ public class MainActivity extends AppCompatActivity {
                                                   public void onSuccess(List<FirebaseVisionFace> faces) {
 
 
+
                                                       for (FirebaseVisionFace face : faces) {
-                                                              /*Log.d("tag", "****************************");
+                                                              Log.d("tag", "****************************");
                                                               Log.d("tag", "face [" + face + "]");
                                                               Log.d("tag", "Smiling Prob [" + face.getSmilingProbability() + "]");
                                                               Log.d("tag", "Left eye open [" + face.getLeftEyeOpenProbability() + "]");
-                                                              Log.d("tag", "Right eye open [" + face.getRightEyeOpenProbability() + "]");*/
+                                                              Log.d("tag", "Right eye open [" + face.getRightEyeOpenProbability() + "]");
                                                           boolean sleeping = false;
                                                           if ((face.getLeftEyeOpenProbability() < 0.4) && (face.getRightEyeOpenProbability() < 0.4)) {
                                                               if (counter == 3) {
@@ -300,8 +302,10 @@ public class MainActivity extends AppCompatActivity {
                                                           }
 
                                                       }
+
                                                   }
                                               });
+        pic.recycle();
 
 
 
