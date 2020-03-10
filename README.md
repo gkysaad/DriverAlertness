@@ -1,5 +1,9 @@
 # HootGuard
 
+<b> To try it out, download the apk below: </b> <br>
+Note: your device must have a large amount of RAM. <br>
+https://drive.google.com/open?id=1im6fOyNT9mNpDHgg_wplihe8bzB9hk78
+
 <b> Screenshots</b>
 
 ![Notification](https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/000/841/295/datas/gallery.jpg)
